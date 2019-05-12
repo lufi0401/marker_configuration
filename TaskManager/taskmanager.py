@@ -4,6 +4,7 @@
 # TODO: finish task manager
 
 import os
+import json
 import sqlite3
 
 DB_NAME = "data.db"
@@ -19,12 +20,12 @@ class TaskManager(object):
     def __init__(self, validate_func, execute_func, path=DEFAULT_DATA_PATH):
         self.__validate = validate_func
         self.__execute = TaskManager.execute_wrap(execute_func)
-        self._db_path = path if path.endswith(".db") else \
+        self.db_path = path if path.endswith(".db") else \
                         os.path.join(path, DB_NAME)
-        self._running_task = []
+        self.running_tasks = {}
 
-        self._db_conn = sqlite3.connect(self._db_path)
-        c = self._db_conn.cursor()
+        conn = sqlite3.connect(self.db_path)
+        c = conn.cursor()
         c.execute('''CREATE TABLE IF NOT EXISTS input_sets(
             input_id INTEGER PRIMARY KEY,
             input_json TEXT NOT NULL
@@ -35,11 +36,34 @@ class TaskManager(object):
             input_id INTEGER NOT NULL,
                 FOREIGN KEY (input_id)  REFERENCES input_sets(input_id)
         );''')
-        self._db_conn.commit()
+        conn.commit()
+        conn.close()
 
 
     def create_task(self, input_set):
-        pass
+        ret_validate = self.__validate(input_set)
+        if ret_validate.get("status") is not True: # input_set invalid
+            return ret_validate
+        # TODO insert tasks and commit
+
+        conn = sqlite3.connect(self.db_path)
+        c = conn.cursor()
+        try:
+            c.execute("INSERT INTO input_sets (input_json) VALUES (?)", 
+                      (json.dumps(input_set),)
+            )
+            conn.commit()
+            ret_dict = { 
+                "status": True,
+                "input_set_id": c.lastrowid,
+            }
+            return ret_dict
+        except Exception as e:
+            return {
+                "status": False,
+                "message": repr(e)
+            }
+
 
     def start_task(self, task_name):
         pass
