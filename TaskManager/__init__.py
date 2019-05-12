@@ -1,1 +1,1 @@
-from taskmanager import TaskManager
+from .taskmanager import TaskManager
