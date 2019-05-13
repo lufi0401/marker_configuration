@@ -19,16 +19,24 @@ In processing markers will be stored as vecotrs and stored contiguously
 <br />
 
 ### Maker Configuration
-Maker configuration is a list of `makers`
+Maker configuration is a list of `makers` and a list of rspective `mount_point_id` and `length` used
 ```json
-markers: list of markers
+mount_points_and_lengths
+id: int
+len: float
 
 Example:
-{ "markers": [
-        {"x": 1.0, "y": 1.0, "z": 1.0 },
-        {"x": 2.0, "y": 1.0, "z": 1.0 },
-        {"x": 1.0, "y": 2.0, "z": 1.0 },
-        {"x": 1.0, "y": 1.0, "z": 2.0 }
+{   "markers": [
+            {"x": 1.0, "y": 1.0, "z": 1.0 },
+            {"x": 2.0, "y": 1.0, "z": 1.0 },
+            {"x": 1.0, "y": 2.0, "z": 1.0 },
+            {"x": 1.0, "y": 1.0, "z": 2.0 }
+        ],
+    "mount_points_and_lengths" [
+        {"id": 0, "len": 30.0},
+        {"id": 2, "len": 30.0},
+        {"id": 3, "len": 40.0},
+        {"id": 4, "len": 30.0},
     ]
 }
 ```
@@ -72,7 +80,7 @@ Example
     ],
     "constraints": {
         "n_markers": [4, 5],
-        "stick_lengths": [ 30, 40 ]
+        "stick_lengths": [ 30.0, 40.0 ]
     },
     "similarity_function": {
         "name": "l2_point_norm",

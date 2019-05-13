@@ -16,6 +16,7 @@ DEFAULT_DATA_PATH = "./data/data.db"
 
 Task = namedtuple('Task', ['process', 'interrupt_flag'])
 
+
 class TaskManager(object):
     """
     manage tasks given input validation and execution functions
