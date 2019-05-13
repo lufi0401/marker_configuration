@@ -65,14 +65,11 @@ def generate(sockets, constraints, similarity_function,
                 marker_coords = i_coords + i_vecs * i_sticks
                 logging.debug("maker_coords:\n{}".format(marker_coords))
 
-                unique = True
+                # Stop once conflict detected
                 for i, config in enumerate(unique_configs):
                     if similar(marker_coords, config["markers"]):
-                        # logging.debug("removing idx {}".format(-i-1))
-                        # unique_configs.pop(-i-1)
-                        unique = False
-
-                if unique:
+                        break
+                else:
                     config = {
                         "markers": marker_coords,
                         "socket_ids": socket_idxs,
@@ -93,9 +90,10 @@ def generate(sockets, constraints, similarity_function,
         config["markers"] = [ {k:v for k,v in zip(["x", "y", "z"], pt)} for pt in config["markers"] ]
         config["socket_ids"] = config["socket_ids"].tolist()
         config["stick_ids"] = config["stick_ids"].tolist()
-    progress = "Completed: {}/{} generated. {} unique set currently.".format(
+    progress = "Completed: {}/{} generated. {} unique sets.".format(
         count, n_combin, len(unique_configs)
     )
+    logging.info(progress)
     update_func(update_type="progress", content=progress,
                 **update_param)
     update_func(update_type="result_json", content=json.dumps(unique_configs),

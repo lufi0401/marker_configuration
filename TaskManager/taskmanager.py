@@ -159,7 +159,41 @@ class TaskManager(object):
                 "message": repr(e)
             }, -1
 
+    def get_task_info(self, input_id):
+        try:
+            logging.debug("get_task_info, id: {}".format(input_id))
+            # Retrieve Data
+            conn = sqlite3.connect(self.db_path)
+            c = conn.cursor()
+            query = """SELECT input_sets.input_id, result_id, input_json,
+                            progress, result_json
+                       FROM input_sets LEFT JOIN results
+                            ON input_sets.input_id = results.input_id
+                       WHERE input_sets.input_id = ?"""
+            c.execute(query, (input_id,))
+            row = c.fetchone()
+            if row is None:
+                raise IndexError("input_id {} not found".format(input_id))
+            input_set = {k:v for v,k in zip(row,
+                ["input_id", "task_id", "input_json", "progress", "result_json"]
+            )}
+            for k in ["input_json", "result_json"]:
+                if input_set[k] is not None: 
+                    input_set[k] = json.loads(input_set[k])
 
+            conn.close()
+            return {
+                "status": True,
+                "info": input_set
+            }
+        except Exception as e:
+            logging.debug("Error get_task_info: {}".format(e))
+            conn.close()
+            raise
+            return {
+                "status": False,
+                "message": repr(e)
+            }
 
     def get_task_and_allocate_tid(self, input_id):
         """

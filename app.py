@@ -41,6 +41,12 @@ def upload_input_set():
     ret = tm.create_task(content)
     return jsonify(ret)
 
+@app.route('/input_set/<int:input_id>/', methods=['GET'])
+def get_task(input_id):
+    logging.debug("input_set/, id: {}".format(input_id))
+    ret = tm.get_task_info(input_id)
+    return jsonify(ret)
+
 @app.route('/input_set/<int:input_id>/start', methods=['POST'])
 def start_task(input_id):
     logging.debug("input_set/start, id: {}".format(input_id))
