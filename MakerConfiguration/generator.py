@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import time
+import json
 import logging
 
 #TODO: FInish the generate
@@ -15,6 +16,14 @@ def generate(mount_points, constraints, similarity_function,
         print("Time passed:", i)
         update_func(update_type="progress", content="Time {}".format(i), 
                     **update_param)
-        if interrupt_flag is True:
+        if interrupt_flag.value is True:
+            update_func(update_type="progress", content="Interrupted",
+                        **update_param)
             return {"status": False, "message": "Interrupted"}
+
+    update_func(update_type="progress", content="Completed.",
+                **update_param)
+    update_func(update_type="result_json", content=json.dumps({"tasks": 123}),
+                **update_param)
+
     return {"status": True}

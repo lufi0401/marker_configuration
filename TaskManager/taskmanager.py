@@ -108,21 +108,58 @@ class TaskManager(object):
         if self.running_tasks.get(task_id) is not None:
             t = self.running_tasks.get(task_id)
             if t.process.is_alive():
-                t.interrupt_flag = True
+                t.interrupt_flag.value = True
                 return {
                     "status": True,
-                    "message": "interrupting task_id {}.".format(task_id)
+                    "message": "interrupting task_id {}...".format(task_id)
                 }
         return {
             "status": True,
             "message": "task_id {} not running".format(task_id)
         }
 
-    def list_available_tasks(self, ):
-        pass
+    def list_tasks(self):
+        try:
+            tasks = []
+            # Retrieve Data
+            conn = sqlite3.connect(self.db_path)
+            c = conn.cursor()
+            query = """SELECT input_sets.input_id, result_id, progress
+                       FROM input_sets LEFT JOIN results
+                            ON input_sets.input_id = results.input_id;"""
+            c.execute(query)
+            for row in c:
+                input_id, task_id, progress = row
+                if self.running_tasks.get(task_id) is not None:
+                    t = self.running_tasks.get(task_id)
+                    if t.process.is_alive():
+                        running = True
+                    else:
+                        running = False
+                        self.running_tasks.pop(task_id)
+                else:
+                    running = False
+                tasks.append({
+                    "input_id": input_id,
+                    "task_id": task_id,
+                    "running": running,
+                    "progress": progress
+                })
 
-    def list_running_tasks(self, ):
-        pass
+            conn.close()
+            return {
+                "status": True,
+                "tasks": tasks
+            }                
+        except Exception as e:
+            logging.debug("Error list_tasks: {}".format(e))
+            conn.close()
+            return {
+                "status": False,
+                "message": repr(e)
+            }, -1
+
+
 
     def get_task_and_allocate_tid(self, input_id):
         logging.debug("get_task, input_id: {}".format(input_id))

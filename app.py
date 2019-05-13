@@ -47,6 +47,19 @@ def start_task(input_id):
     ret = tm.start_task(input_id)
     return jsonify(ret)
 
+@app.route('/input_set/<int:input_id>/stop', methods=['POST'])
+def stop_task(input_id):
+    logging.debug("input_set/stop, id: {}".format(input_id))
+    ret = tm.stop_task(input_id)
+    return jsonify(ret)
+
+@app.route('/input_set/list', methods=['GET'])
+def list_tasks():
+    logging.debug("input_set/list")
+    ret = tm.list_tasks()
+    return jsonify(ret)
+
+
 
 if __name__ == '__main__':
     logging.basicConfig(level=logging.DEBUG)
