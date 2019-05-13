@@ -4,6 +4,10 @@ import json
 import logging
 
 from flask import Flask, Request, request, jsonify
+
+from TaskManager import TaskManager
+from MakerConfiguration import generate, validate
+
 app = Flask(__name__)
 
 class custom_request(Request):
@@ -14,27 +18,35 @@ class custom_request(Request):
         }
 app.request_class = custom_request
 
-from TaskManager import TaskManager
 
-def pass_through(*args, **kwargs):
-    """ pass through function for debug """
-    return {"status": True}
+# TO BE DELETED
+# def pass_through(*args, **kwargs):
+#     """ pass through function for debug """
+#     logging.debug("PASS THROUGH: Doing Nothing")
+#     return {"status": True}
 
 
-tm = TaskManager(validate_func=pass_through, execute_func=pass_through)
+tm = TaskManager(validate_func=validate, execute_func=generate)
 
 @app.route('/')
 def hello_world():
     return 'Hello, World!'
 
-@app.route('/upload_input_set', methods=['POST'])
+@app.route('/input_set/upload', methods=['POST'])
 def upload_input_set():
     content = request.get_json()
     if content.get("status") is False:
         return jsonify(content), 400
-    logging.debug("upload_input_set, json: "+json.dumps(content))
+    logging.debug("input_set/upload, json: "+json.dumps(content))
     ret = tm.create_task(content)
     return jsonify(ret)
+
+@app.route('/input_set/<int:input_id>/start', methods=['POST'])
+def start_task(input_id):
+    logging.debug("input_set/start, id: {}".format(input_id))
+    ret = tm.start_task(input_id)
+    return jsonify(ret)
+
 
 if __name__ == '__main__':
     logging.basicConfig(level=logging.DEBUG)
