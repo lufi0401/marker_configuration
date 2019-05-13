@@ -10,10 +10,12 @@ import functools
 import itertools
 import numpy as np
 
+from .similarity_functions import create_similarity_function
+
 #TODO: FInish the generate
 def generate(sockets, constraints, similarity_function, 
              interrupt_flag, update_func, update_param):
-    logging.basicConfig(level=logging.DEBUG)
+    logging.basicConfig(level=logging.INFO)
     logging.debug("generate")
 
     coords, vecs = [], []
@@ -40,50 +42,69 @@ def generate(sockets, constraints, similarity_function,
 
     logging.info("Total possible combinations: {}".format(n_combin))
 
+    similar = create_similarity_function(similarity_function)
 
+    count = 0
     unique_configs = []    
     for r_mark in markers:
-        for socket_idx in itertools.combinations(range(n_sockets), int(r_mark)):
+        for socket_idxs in itertools.combinations(range(n_sockets), int(r_mark)):
             for stick_idxs in itertools.product(range(n_stick_len), repeat=r_mark):
                 # Stop at any point
                 if interrupt_flag.value is True:
                     update_func(update_type="progress", content="Interrupted",
                                 **update_param)
                     return {"status": False, "message": "Interrupted"}
-                
-                print(np.array(socket_idx), np.array(stick_idxs))
 
-                i_coords = np.take(coords, socket_idx, axis=0) 
-                i_vecs = np.take(vecs, socket_idx, axis=0)
+                socket_idxs = np.array(socket_idxs, dtype=np.int)
+                stick_idxs = np.array(stick_idxs, dtype=np.int)
+
+                i_coords = np.take(coords, socket_idxs, axis=0) 
+                i_vecs = np.take(vecs, socket_idxs, axis=0)
                 i_sticks = np.take(stick_lengths, stick_idxs, axis=0).reshape(-1, 1)
 
                 marker_coords = i_coords + i_vecs * i_sticks
-                import ipdb; ipdb.set_trace()
-                
-    # TODO: Finish this part
-    # import ipdb; ipdb.set_trace()
+                logging.debug("maker_coords:\n{}".format(marker_coords))
+
+                unique = True
+                for i, config in enumerate(unique_configs):
+                    if similar(marker_coords, config["markers"]):
+                        # logging.debug("removing idx {}".format(-i-1))
+                        # unique_configs.pop(-i-1)
+                        unique = False
+
+                if unique:
+                    config = {
+                        "markers": marker_coords,
+                        "socket_ids": socket_idxs,
+                        "stick_ids": stick_idxs
+                    }
+                    unique_configs.append(config)
+
+                count += 1
+                if count % 10 == 0:
+                    progress = "{}/{} generated. {} unique set currently.".format(
+                        count, n_combin, len(unique_configs)
+                    )
+                    update_func(update_type="progress", content=progress,
+                                **update_param)
 
 
-
-
-    # for i in range(10):
-    #     time.sleep(2)
-    #     print("Time passed:", i)
-    #     update_func(update_type="progress", content="Time {}".format(i), 
-    #                 **update_param)
-    #     if interrupt_flag.value is True:
-    #         update_func(update_type="progress", content="Interrupted",
-    #                     **update_param)
-    #         return {"status": False, "message": "Interrupted"}
-
-    update_func(update_type="progress", content="Completed.",
+    for config in unique_configs:
+        config["markers"] = [ {k:v for k,v in zip(["x", "y", "z"], pt)} for pt in config["markers"] ]
+        config["socket_ids"] = config["socket_ids"].tolist()
+        config["stick_ids"] = config["stick_ids"].tolist()
+    progress = "Completed: {}/{} generated. {} unique set currently.".format(
+        count, n_combin, len(unique_configs)
+    )
+    update_func(update_type="progress", content=progress,
                 **update_param)
-    update_func(update_type="result_json", content=json.dumps({"tasks": 123}),
+    update_func(update_type="result_json", content=json.dumps(unique_configs),
                 **update_param)
 
-    return {"status": True}
+    return { "status": True }
 
 
+# TODO: Dlete Test Code
 if __name__ == "__main__":
     from multiprocessing import Value
     d = json.loads("""
@@ -99,11 +120,12 @@ if __name__ == "__main__":
         ],
         "constraints": {
             "n_markers": [4, 5, 5],
-            "stick_lengths": [ 3.0, 4.0 ]
+            "stick_lengths": [ 10.0, 30.0, 50.0 ]
         },
         "similarity_function": {
             "name": "l2_point_norm",
-            "threshold": 2.0
+            "avg_threshold": 10.0,
+            "max_threshold": 20.0
         } 
     }""")
     def do_nothing(content=None, *args, **kwargs):

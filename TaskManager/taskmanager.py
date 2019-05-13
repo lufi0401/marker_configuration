@@ -162,6 +162,9 @@ class TaskManager(object):
 
 
     def get_task_and_allocate_tid(self, input_id):
+        """
+        retrieve task input data and allocate task_id for processing
+        """
         logging.debug("get_task, input_id: {}".format(input_id))
 
         try:
@@ -192,9 +195,13 @@ class TaskManager(object):
         conn.close()
         return input_set, ret_id
 
+
     @staticmethod
     def update_task(update_type, content, db_path, task_id):
-        """ update the task with update type and content"""
+        """ 
+        To be passed to task so that either progress or result_json can be
+        updated with content for monitoring 
+        """
         if update_type not in ["progress", "result_json"]:
             return False
         
