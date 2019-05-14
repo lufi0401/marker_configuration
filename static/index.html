@@ -1,0 +1,62 @@
+<!doctype html>
+<html class="no-js" lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Marker Configuration Service</title>
+    <link rel="stylesheet" href="static/css/app.css" />
+    <link rel="stylesheet" href="static/css/foundation.css" />
+</head>
+
+<body>
+    <h1>Marker Conguration Service</h1>
+
+    <div class="callout">
+        <div class="clearfix">
+            <h4 class="float-left">All Tasks</h4>
+            <a id="refresh" class="button float-right">Refresh</a>
+        </div>
+        <div id="tasks">
+            <table class="hover">
+                <thead>
+                    <tr>
+                        <th width="10%">Input ID</th>
+                        <th width="10%">Task ID</th>
+                        <th width="10%">Running</th>
+                        <th >Progress</th>
+                    </tr>
+                </thead>
+                <tbody id="tasks_body">
+                    <tr>
+                        <td>-</td>
+                        <td>-</td>
+                        <td>-</td>
+                        <td>Tasks will appear here.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div id="task_details_window" class="callout hide">
+        <div class="clearfix">
+            <h4 class="float-left">Task Details</h4>
+        </div>
+        <div id="task_details">
+        </div>
+    </div>
+
+
+    <script src="static/js/vendor/jquery.js"></script>
+    <script src="static/js/vendor/what-input.js"></script>
+    <script src="static/js/vendor/foundation.min.js"></script>
+    <script src="static/js/app.js"></script>
+    <script>
+        $(document).foundation();
+    </script>
+
+</body>
+
+</html>

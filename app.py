@@ -29,8 +29,8 @@ app.request_class = custom_request
 tm = TaskManager(validate_func=validate, execute_func=generate)
 
 @app.route('/')
-def hello_world():
-    return 'Hello, World!'
+def root():
+    return app.send_static_file('index.html')
 
 @app.route('/input_set/upload', methods=['POST'])
 def upload_input_set():
