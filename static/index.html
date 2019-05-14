@@ -17,6 +17,7 @@
         <div class="clearfix">
             <h4 class="float-left">All Tasks</h4>
             <a id="refresh" class="button float-right">Refresh</a>
+            <div id="refresh" class="loader float-right"></div>
         </div>
         <div id="tasks">
             <table class="hover">
@@ -40,11 +41,27 @@
         </div>
     </div>
 
-    <div id="task_details_window" class="callout hide">
+    <div id="task_details_window" class="callout">
         <div class="clearfix">
             <h4 class="float-left">Task Details</h4>
         </div>
-        <div id="task_details">
+        <ul class="tabs" data-tabs id="example-tabs">
+            <li class="tabs-title is-active"><a href="#panel1" aria-selected="true">Sockets</a></li>
+            <li class="tabs-title"><a href="#panel2">Constraints & Similarity Function</a></li>
+            <li class="tabs-title"><a href="#panel3">Unique Sets</a></li>
+        </ul>
+        
+        <div class="tabs-content" data-tabs-content="example-tabs">
+            <div class="tabs-panel is-active" id="panel1">
+                <pre></pre>
+            </div>
+            <div class="tabs-panel" id="panel2">
+                <pre></pre>>
+            </div>
+            <div class="tabs-panel" id="panel3">
+                <p>Three</p>
+                <p>Check me out! I'm a super cool Tab panel with text content!</p>
+            </div>
         </div>
     </div>
 
