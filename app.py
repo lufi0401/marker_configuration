@@ -35,6 +35,8 @@ def root():
 @app.route('/input_set/upload', methods=['POST'])
 def upload_input_set():
     content = request.get_json()
+    if content is None:
+        return jsonify({"status": False, "message": "There is no json."}), 400
     if content.get("status") is False:
         return jsonify(content), 400
     logging.debug("input_set/upload, json: "+json.dumps(content))

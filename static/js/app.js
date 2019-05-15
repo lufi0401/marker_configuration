@@ -4,10 +4,9 @@ var refresh_tasks, show_task_details, current_task, scene_init;
 
 // Inits
 $(document).ready(function () {
-    console.log("on load");
-    $(".loader").hide()
-    refresh_tasks();
+    console.log("loaded");
     $("div#task_details_window").hide();
+    refresh_tasks();
 });
 
 // Task list related
@@ -27,7 +26,9 @@ function refresh_tasks() {
             $(tr).append("<td>" + data.tasks[i].task_id + "</td>");
             $(tr).append("<td>" + data.tasks[i].running + "</td>");
             $(tr).append("<td>" + data.tasks[i].progress + "</td>");
-            $(tr).click(show_task_details);
+            $(tr).click(function() {
+                show_task_details($($(this).children()[0]).text());
+            });
             tbody.append(tr);
         }
         
@@ -37,28 +38,78 @@ function refresh_tasks() {
 
 $("a#refresh.button").click(refresh_tasks);
 
-// Tasks details related
-function refresh_task_progress() {
-    let input_id = current_task.input_id;
-    let loader = $('div#progress_update div.loader');
-    loader.show()
-    $.getJSON("/input_set/"+input_id, function (data) {
-        loader.hide()
-        setTimeout(refresh_task_progress, 5000);
-        if (!data.status) return;
-        current_task = data.info;
+$("input:file#upload").change(() =>{
+    let file = $("input:file#upload").prop("files")[0];
+    let fileReader = new FileReader();
+    fileReader.onerror = () => { alert("Failed to read selected file.") };
+    fileReader.onload = () => {
+        let result = fileReader.result;
+        console.log(result)
+        if (!result.startsWith("data:application/json")) {
+            alert("Selected file is not json");
+            return;
+        }
+        let file_data;
+        try {
+            file_data = atob(result.substr(result.match("base64").index + 7));
+        } catch (err) {
+            alert("Failed to read selected file: "+err.message);
+            return;
+        }
+        $.ajax({
+            url: "/input_set/upload",
+            type: "POST",
+            data: file_data,
+            contentType: "application/json",
+            success: (data) => {
+            if (!data.status) {
+                alert("Failed to upload: "+data.message);
+                return;
+            }
+            refresh_tasks();
+            show_task_details(data.input_set_id);
+            }
+        })
 
-        $("div#progress_update p").text(current_task.progress);
-    })
+    };
+    fileReader.readAsDataURL(file);
+})
+// "data:application/json;base64,ew0KICAgICAgICAic29ja2V0cyI6IFsNCiAgICAgICAgICAgIHsieCI6IDAuMCwgInkiOiAwLjAsICJ6IjogMC4wLCAgInZ4IjogMS4wLCAidnkiOiAwLjAsICJ2eiI6IDAuMH0sDQogICAgICAgICAgICB7IngiOiAwLjAsICJ5IjogMC4wLCAieiI6IDAuMCwgICJ2eCI6IC0xLjAsICJ2eSI6IDAuMCwgInZ6IjogMC4wfSwNCiAgICAgICAgICAgIHsieCI6IDAuMCwgInkiOiAwLjAsICJ6IjogMC4wLCAgInZ4IjogMC4wLCAidnkiOiAwLjAsICJ2eiI6IDEuMH0sDQogICAgICAgICAgICB7IngiOiAwLjAsICJ5IjogMTAuMCwgInoiOiAwLjAsICAidngiOiAxLjAsICJ2eSI6IDAuMCwgInZ6IjogMC4wfSwNCiAgICAgICAgICAgIHsieCI6IDAuMCwgInkiOiAxMC4wLCAieiI6IDAuMCwgICJ2eCI6IC0xLjAsICJ2eSI6IDAuMCwgInZ6IjogMC4wfSwNCiAgICAgICAgICAgIHsieCI6IDAuMCwgInkiOiAxMC4wLCAieiI6IDAuMCwgICJ2eCI6IDAuMCwgInZ5IjogMC4wLCAidnoiOiAxLjB9DQoNCiAgICAgICAgXSwNCiAgICAgICAgImNvbnN0cmFpbnRzIjogew0KICAgICAgICAgICAgIm5fbWFya2VycyI6IFs0LCA1LCA1XSwNCiAgICAgICAgICAgICJzdGlja19sZW5ndGhzIjogWyAxMC4wLCAzMC4wLCA1MC4wIF0NCiAgICAgICAgfSwNCiAgICAgICAgInNpbWlsYXJpdHlfZnVuY3Rpb24iOiB7DQogICAgICAgICAgICAibmFtZSI6ICJsMl9wb2ludF9ub3JtIiwNCiAgICAgICAgICAgICJhdmdfdGhyZXNob2xkIjogMTAuMCwNCiAgICAgICAgICAgICJtYXhfdGhyZXNob2xkIjogMjAuMA0KICAgICAgICB9IA0KICAgIH0=
+
+// Tasks details related
+var task_refreshing = null;
+
+function update_progress(data) {
+    let loader = $('div#progress_update div.loader');
+    loader.hide();
+    if (task_refreshing == null)
+        task_refreshing = setInterval(() => {
+            let input_id = current_task.input_id;
+            loader.show()
+            $.getJSON("/input_set/" + input_id, update_progress)
+        }, 3000);
+    if (!data.status) return;
+    current_task = data.info;
+
+    let start_button = $("a#start");
+    let stop_button = $("a#stop");
+    if (current_task.running) {
+        $(start_button).addClass("disabled").hide();
+        $(stop_button).removeClass("disabled").show();
+    } else {
+        $(stop_button).addClass("disabled").hide();
+        $(start_button).removeClass("disabled").show();
+    }
+
+    $("div#progress_update p").text(current_task.progress);
 }
 
-function show_task_details() {
-    let input_id = $($(this).children()[0]).text();
-    $("div#task_details_window").show();
-
+function show_task_details(input_id) {
     $.getJSON("/input_set/" + input_id, function (data) {
         if (!data.status) return;
-        current_task = data.info;
+        $("div#task_details_window").show();
+        $("b#task_id").text(input_id)
+        update_progress(data);
         // update socket_table
         let sockets = current_task.input_json.sockets;
         let tbody = $("tbody#sockets");
@@ -80,8 +131,6 @@ function show_task_details() {
             JSON.stringify(current_task.input_json.similarity_function, null, 2)
         );
 
-        $("div#progress_update p").text(current_task.progress);
-        
         // setup unique_set
         let n_unique_set = 0;
         if (current_task.result_json != null)
@@ -98,15 +147,49 @@ function show_task_details() {
         $(selector).foundation();
         $(selector).children().on('changed.zf.slider', three_update_unique_set);
 
-        setTimeout(refresh_task_progress, 5000);
     })
 
     three_init();
 
 }
 
+$("a#start").click(() => {
+    let input_id = current_task.input_id;
+    let start_button = $("a#start");
+    $(start_button).addClass("disabled");
+    $.post("/input_set/" + input_id + "/start", (data) => {
+        if (!data.status) {
+            $(start_button).removeClass("disabled");
+            alert("Start failed: " + data.message);
+            return;
+        } else {
+            $(start_button).hide();
+            alert("Task started.");
+        }
+        refresh_tasks();
+    });
+})
+
+$("a#stop").click(() => {
+    let input_id = current_task.input_id;
+    let stop_button = $("a#stop");
+    $(stop_button).addClass("disabled");
+    $.post("/input_set/" + input_id + "/stop", (data) => {
+        if (!data.status) {
+            $(stop_button).removeClass("disabled");
+            alert("Stop failed: " + data.message);
+            return;
+        } else {
+            $(stop_button).hide()
+            alert("Task Interrupted.");
+        }
+        refresh_tasks();
+    })
+})
+
+
 // visualizer related
-var set_scene = null, three_resize;
+var set_scene = null;
 
 function three_init() {
     if (set_scene != null) return;
@@ -118,7 +201,6 @@ function three_init() {
     set_scene.renderer = new THREE.WebGLRenderer();
     $(set_scene.container).empty();
     $(set_scene.container).append(set_scene.renderer.domElement);
-    $(set_scene.container).resize(three_resize);
     set_scene.w = 1000.;
     set_scene.h = 500.;
     set_scene.renderer.setSize(set_scene.w, set_scene.h);
@@ -150,19 +232,16 @@ function three_init() {
 
 function animate() {
     requestAnimationFrame(animate);
-    if (set_scene.container.width() != set_scene.w)
-        three_resize();
+    if (set_scene.container.width() != set_scene.w) {
+        set_scene.w = set_scene.container.width();
+        set_scene.renderer.setSize(set_scene.w, set_scene.h);
+        set_scene.camera.aspect = set_scene.w / set_scene.h;
+        set_scene.camera.updateProjectionMatrix();
+    }
     set_scene.controls.update();
     set_scene.renderer.render(set_scene.scene, set_scene.camera);
 };
 
-function three_resize() {
-    console.log("three_resize")
-    set_scene.w = set_scene.container.width();
-    set_scene.renderer.setSize(set_scene.w, set_scene.h);
-    set_scene.camera.aspect = set_scene.w / set_scene.h;
-    set_scene.camera.updateProjectionMatrix();
-};
 
 function three_update_unique_set() {
     let tbody = $("tbody#unique_set");

@@ -178,10 +178,22 @@ class TaskManager(object):
                 ["input_id", "task_id", "input_json", "progress", "result_json"]
             )}
             for k in ["input_json", "result_json"]:
-                if input_set[k] is not None: 
-                    input_set[k] = json.loads(input_set[k])
+                    try:
+                        input_set[k] = json.loads(input_set[k])
+                    except Exception as e:
+                        logging.error("JSON load error for {}: {}".format(k, e))
+                        input_set[k] = None
 
             conn.close()
+            t = self.running_tasks.get(input_set["task_id"])
+            if t is None:
+                input_set["running"] = False
+            elif not t.process.is_alive():
+                input_set["running"] = False
+                self.running_tasks.pop(input_set["task_id"])
+            else:
+                input_set["running"] = True
+
             return {
                 "status": True,
                 "info": input_set
@@ -214,7 +226,7 @@ class TaskManager(object):
         
             query = """REPLACE INTO results
                        (input_id, result_id, progress, result_json)
-                       VALUES (?, ?, "Initializing...", "")"""
+                       VALUES (?, ?, "Initializing...", NULL)"""
             c.execute(query, (input_id, input_id))
             conn.commit()
             ret_id = input_id

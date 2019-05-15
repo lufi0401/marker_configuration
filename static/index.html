@@ -17,6 +17,8 @@
         <div class="clearfix">
             <h4 class="float-left">All Tasks</h4>
             <a id="refresh" class="button float-right">Refresh</a>
+            <label for="upload" class="button hollow float-right">Upload Input Set</label>
+            <input type="file" id="upload" class="show-for-sr">
             <div id="refresh" class="loader float-right"></div>
         </div>
         <div id="tasks">
@@ -43,9 +45,12 @@
 
     <div id="task_details_window" class="callout">
         <div class="clearfix">
-            <h4 class="float-left">Task Details</h4>
+            <h4 class="float-left">Task Details: <b id="task_id"></b></h4>
+            <a id="stop" class="button float-right alert disabled" href="#">Stop</a>
+            <a id="start" class="button float-right disabled" href="#">Start</a>
         </div>
         <div id="progress_update" class="callout secondary rounded bordered">
+            
             <div class="loader float-right"></div>
             <p>progress update</p>
         </div>
