@@ -29,7 +29,7 @@
                         <th >Progress</th>
                     </tr>
                 </thead>
-                <tbody id="tasks_body">
+                <tbody id="tasks">
                     <tr>
                         <td>-</td>
                         <td>-</td>
@@ -45,22 +45,66 @@
         <div class="clearfix">
             <h4 class="float-left">Task Details</h4>
         </div>
+        <div id="progress_update" class="callout secondary rounded bordered">
+            <div class="loader float-right"></div>
+            <p>progress update</p>
+        </div>
         <ul class="tabs" data-tabs id="example-tabs">
-            <li class="tabs-title is-active"><a href="#panel1" aria-selected="true">Sockets</a></li>
-            <li class="tabs-title"><a href="#panel2">Constraints & Similarity Function</a></li>
-            <li class="tabs-title"><a href="#panel3">Unique Sets</a></li>
+            <li class="tabs-title is-active"><a href="#input_set" aria-selected="true">Input Set</a></li>
+            <li class="tabs-title"><a href="#unique_set">Unique Sets</a></li>
         </ul>
         
         <div class="tabs-content" data-tabs-content="example-tabs">
-            <div class="tabs-panel is-active" id="panel1">
-                <pre></pre>
+            <div class="tabs-panel is-active" id="input_set">
+                <div class="grid-x grid-padding-x">
+                    <div class="cell small-6">
+                        <h5>Sockets</h5>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>x</th>
+                                    <th>y</th>
+                                    <th>z</th>
+                                    <th>vx</th>
+                                    <th>vy</th>
+                                    <th>vz</th>
+                                </tr>
+                            </thead>
+                            <tbody id="sockets"></tbody>
+                        </table>
+                    </div>
+                    <div class="cell small-6">
+                        <h5>Contraints & Similarity Functions</h5>
+                        <pre id="cons_sims"></pre>
+                    </div>
+                </div>
             </div>
-            <div class="tabs-panel" id="panel2">
-                <pre></pre>>
-            </div>
-            <div class="tabs-panel" id="panel3">
-                <p>Three</p>
-                <p>Check me out! I'm a super cool Tab panel with text content!</p>
+            <div class="tabs-panel" id="unique_set">
+                <div class="grid-x grid-margin-x">
+                    <div class="cell small-10" id="unique_set_select">
+                        
+                    </div>
+                    <div class="cell small-2">
+                        <input type="number" id="cur_unique_set">
+                    </div>
+                </div>
+                <div class="grid-x grid-margin-x">
+                    <div class="cell small-8">
+                        <div id="three_container" class="align-center-middle">visualizer</div>
+                    </div>
+                    <div class="cell small-4">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>x</th>
+                                    <th>y</th>
+                                    <th>z</th>
+                                </tr>
+                            </thead>
+                            <tbody id="unique_set"></tbody>
+                        </table>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -69,6 +113,8 @@
     <script src="static/js/vendor/jquery.js"></script>
     <script src="static/js/vendor/what-input.js"></script>
     <script src="static/js/vendor/foundation.min.js"></script>
+    <script src="static/js/vendor/three.js"></script>
+    <script src="static/js/vendor/OrbitControls.js"></script>
     <script src="static/js/app.js"></script>
     <script>
         $(document).foundation();
