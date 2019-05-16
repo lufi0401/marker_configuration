@@ -2,7 +2,9 @@
 # Marker Conguration Service
 
 ## Installation && Running
+
 Prerequisite: python3 with virtualenv. (eg. [Anaconda](https://www.anaconda.com/distribution/))
+
 ```bash
 # setup virtual environment
 virtualenv venv
@@ -18,14 +20,16 @@ pip install -r requirements.txt
 python ./app.py
 
 ```
-Then, go to http://localhost:5000/ to access the UI.
 
-<br />
+Then, go to <http://localhost:5000/> to access the UI.
+.
 
 ## Format
 
 ### Marker
+
 Maker are defined as their `x y z` coordinates
+
 ```json
 x: float
 y: float
@@ -34,12 +38,14 @@ z: float
 Example:
 { "x": 1.0, "y": 1.0, "z": 1.0 }
 ```
-In processing markers will be stored as vecotrs and stored contiguously
 
-<br />
+In processing markers will be stored as vecotrs and stored contiguously
+.
 
 ### Maker Configuration
+
 Maker configuration is a list of `makers` and a list of rspective `mount_point_id` and `length` used
+
 ```json
 sockets_and_lengths
 socket_id: [int]
@@ -57,9 +63,10 @@ Example:
 }
 ```
 
-<br />
+.
 
 ### Combination Input Set
+
 Combination input set consist of `sockets`, `constraints` and `similarity_function`.
 
 `sockets:` mount points is a list of mount point which consists of its coordinate in `x, y, z` and its mounting direction as `vx, vy, vz` forming unit vector
@@ -107,3 +114,17 @@ param names: param values
     }
 }
 ```
+
+.
+
+## Library Used
+
+### Python
+
+- [flask](flask.pocoo.org/)
+- [numpy](https://www.numpy.org/)
+
+### Javascript
+
+- [Foundation sites](https://foundation.zurb.com/sites.html)
+- [Three.js](http://threejs.org/)
