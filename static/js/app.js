@@ -116,12 +116,12 @@ function show_task_details(input_id) {
         tbody.empty();
         for (let i in sockets) {
             let tr = $('<tr/>');
-            $(tr).append("<td>" + sockets[i].x + "</td>");
-            $(tr).append("<td>" + sockets[i].y + "</td>");
-            $(tr).append("<td>" + sockets[i].z + "</td>");
-            $(tr).append("<td>" + sockets[i].vx + "</td>");
-            $(tr).append("<td>" + sockets[i].vy + "</td>");
-            $(tr).append("<td>" + sockets[i].vz + "</td>");
+            $(tr).append("<td>" + sockets[i].x.toFixed(4) + "</td>");
+            $(tr).append("<td>" + sockets[i].y.toFixed(4) + "</td>");
+            $(tr).append("<td>" + sockets[i].z.toFixed(4) + "</td>");
+            $(tr).append("<td>" + sockets[i].vx.toFixed(4) + "</td>");
+            $(tr).append("<td>" + sockets[i].vy.toFixed(4) + "</td>");
+            $(tr).append("<td>" + sockets[i].vz.toFixed(4) + "</td>");
             tbody.append(tr);
         }
         // setup sockets
@@ -262,7 +262,7 @@ function three_setup_sockets() {
 
     let socket_geometry = new THREE.Geometry();
     let socket_material = new THREE.LineBasicMaterial(color);
-    let socket_wireframe = new THREE.LineSegments(socket_geometry, socket_material);
+    let socket_wireframe = new THREE.Line(socket_geometry, socket_material);
     new_sockets.add(socket_wireframe);
 
     let from_vec = new THREE.Vector3(0, 1, 0);
@@ -326,9 +326,9 @@ function three_update_unique_set() {
         new_unique_set.add(line);
 
         let tr = $('<tr/>');
-        $(tr).append("<td>" + positions[i].x + "</td>");
-        $(tr).append("<td>" + positions[i].y + "</td>");
-        $(tr).append("<td>" + positions[i].z + "</td>");
+        $(tr).append("<td>" + positions[i].x.toFixed(4) + "</td>");
+        $(tr).append("<td>" + positions[i].y.toFixed(4) + "</td>");
+        $(tr).append("<td>" + positions[i].z.toFixed(4) + "</td>");
         tbody.append(tr);
     }
 
