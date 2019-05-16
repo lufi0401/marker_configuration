@@ -251,18 +251,28 @@ function three_setup_sockets() {
 
     let sockets = current_task.input_json.sockets;
 
-    let material = new THREE.MeshPhongMaterial({ color: 0xf94545 });
+    let color = { color: 0xf94545 };
+
+    let material = new THREE.MeshPhongMaterial(color);
     let geometry = new THREE.CylinderGeometry(.5,0,.5);
 
     let new_sockets = new THREE.Group();
     set_scene.sockets = new_sockets
     set_scene.scene.add(new_sockets);
 
+    let socket_geometry = new THREE.Geometry();
+    let socket_material = new THREE.LineBasicMaterial(color);
+    let socket_wireframe = new THREE.LineSegments(socket_geometry, socket_material);
+    new_sockets.add(socket_wireframe);
+
     let from_vec = new THREE.Vector3(0, 1, 0);
     for (let i in sockets) {
         let soc = sockets[i]
 
         let to_vec = new THREE.Vector3(soc["vx"], soc["vy"], soc["vz"])
+        socket_geometry.vertices.push(
+            new THREE.Vector3(soc["x"], soc["y"], soc["z"])
+        );
 
         let quat = new THREE.Quaternion();
         quat.setFromUnitVectors(from_vec, to_vec);
@@ -270,7 +280,6 @@ function three_setup_sockets() {
         let disk = new THREE.Mesh(geometry, material);
         new_sockets.add(disk);
         disk.position.set(soc["x"], soc["y"], soc["z"])
-        // disk.setRotationFromQuaternion(quat);
         disk.applyQuaternion(quat);
     }
 }
