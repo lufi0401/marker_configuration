@@ -14,7 +14,7 @@ function refresh_tasks() {
     let loader = $("div#refresh.loader").show();
     $.getJSON("/input_set/list", function(data) {
         // return if empty
-        if (!data.status) return; 
+        if (!data.status) return;
 
         // empty table
         let tbody = $("tbody#tasks");
@@ -31,7 +31,7 @@ function refresh_tasks() {
             });
             tbody.append(tr);
         }
-        
+
         $(loader).hide();
     })
 }
@@ -124,6 +124,8 @@ function show_task_details(input_id) {
             $(tr).append("<td>" + sockets[i].vz + "</td>");
             tbody.append(tr);
         }
+        // setup sockets
+        setTimeout(three_setup_sockets, 0);
 
         // update contraints and similarity_function
         $("pre#cons_sims").text(
@@ -143,7 +145,7 @@ function show_task_details(input_id) {
             </div>\
         ');
         $(selector).children().attr("data-end",n_unique_set);
-        $(selector).children().children().attr('aria-controls',"cur_unique_set"); 
+        $(selector).children().children().attr('aria-controls',"cur_unique_set");
         $(selector).foundation();
         $(selector).children().on('changed.zf.slider', three_update_unique_set);
 
@@ -197,8 +199,8 @@ function three_init() {
     set_scene = {};
 
     set_scene.container = $('#three_container');
-    
-    set_scene.renderer = new THREE.WebGLRenderer();
+
+    set_scene.renderer = new THREE.WebGLRenderer({ antialias: true });
     $(set_scene.container).empty();
     $(set_scene.container).append(set_scene.renderer.domElement);
     set_scene.w = 1000.;
@@ -224,8 +226,9 @@ function three_init() {
     grid.material.transparent = true;
     set_scene.scene.add(grid);
 
-    let axes = new THREE.AxesHelper(10);
-    set_scene.scene.add(axes);
+    set_scene.axes = new THREE.AxesHelper(10);
+    set_scene.axes.position.set( -10, -5, -10 );
+    set_scene.scene.add(set_scene.axes);
 
     animate();
 };
@@ -242,6 +245,35 @@ function animate() {
     set_scene.renderer.render(set_scene.scene, set_scene.camera);
 };
 
+function three_setup_sockets() {
+    if (set_scene.sockets != null)
+        set_scene.scene.remove(set_scene.sockets);
+
+    let sockets = current_task.input_json.sockets;
+
+    let material = new THREE.MeshPhongMaterial({ color: 0xf94545 });
+    let geometry = new THREE.CylinderGeometry(.5,0,.5);
+
+    let new_sockets = new THREE.Group();
+    set_scene.sockets = new_sockets
+    set_scene.scene.add(new_sockets);
+
+    let from_vec = new THREE.Vector3(0, 1, 0);
+    for (let i in sockets) {
+        let soc = sockets[i]
+
+        let to_vec = new THREE.Vector3(soc["vx"], soc["vy"], soc["vz"])
+
+        let quat = new THREE.Quaternion();
+        quat.setFromUnitVectors(from_vec, to_vec);
+
+        let disk = new THREE.Mesh(geometry, material);
+        new_sockets.add(disk);
+        disk.position.set(soc["x"], soc["y"], soc["z"])
+        // disk.setRotationFromQuaternion(quat);
+        disk.applyQuaternion(quat);
+    }
+}
 
 function three_update_unique_set() {
     let tbody = $("tbody#unique_set");
@@ -250,31 +282,49 @@ function three_update_unique_set() {
     if (set_scene.unique_set != null)
         set_scene.scene.remove(set_scene.unique_set);
 
-    if (current_task.result_json == null || current_task.result_json.length <= 0) 
+    if (current_task.result_json == null || current_task.result_json.length <= 0)
         return;
-    
+
     let unique_set_id = $('input#cur_unique_set').val();
-    let positions = current_task.result_json[unique_set_id].markers
+    let positions = current_task.result_json[unique_set_id].markers;
+    let socket_ids = current_task.result_json[unique_set_id].socket_ids;
+    let sockets = current_task.input_json.sockets;
+
     let geometry = new THREE.SphereGeometry(1);
     let material = new THREE.MeshPhongMaterial({ color: 0xefefef });
+    var line_material = new THREE.LineBasicMaterial({ color: 0xdddd00 });
 
-    let new_unique_set = new THREE.Object3D();
+    let new_unique_set = new THREE.Group();
+    let axes_pos = { x: 1e9, y: 1e9, z: 1e9 };
     for (let i in positions) {
         let pos = positions[i];
+
+        axes_pos.x = axes_pos.x < pos["x"] ? axes_pos.x : pos["x"];
+        axes_pos.y = axes_pos.y < pos["y"] ? axes_pos.y : pos["y"];
+        axes_pos.z = axes_pos.z < pos["z"] ? axes_pos.z : pos["z"];
+
         let ball = new THREE.Mesh(geometry, material);
         ball.position.set(pos["x"], pos["y"], pos["z"]);
         new_unique_set.add(ball);
-    }
 
-    set_scene.unique_set = new_unique_set;
-    set_scene.scene.add(set_scene.unique_set);
+        let skt_pos = sockets[socket_ids[i]];
+        let line_geometry = new THREE.Geometry();
+        line_geometry.vertices.push(
+            new THREE.Vector3(pos["x"], pos["y"], pos["z"]),
+            new THREE.Vector3(skt_pos["x"], skt_pos["y"], skt_pos["z"]),
+        )
+        var line = new THREE.Line( line_geometry, line_material );
+        new_unique_set.add(line);
 
-    
-    for (let i in positions) {
         let tr = $('<tr/>');
         $(tr).append("<td>" + positions[i].x + "</td>");
         $(tr).append("<td>" + positions[i].y + "</td>");
         $(tr).append("<td>" + positions[i].z + "</td>");
         tbody.append(tr);
     }
+
+    set_scene.unique_set = new_unique_set;
+    set_scene.scene.add(set_scene.unique_set);
+    set_scene.axes.position.set(axes_pos.x-5, -5, axes_pos.z-5);
+
 };
