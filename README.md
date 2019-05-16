@@ -1,6 +1,26 @@
 
 # Marker Conguration Service
 
+## Installation && Running
+Prerequisite: python3 with virtualenv. (eg. [Anaconda](https://www.anaconda.com/distribution/))
+```bash
+# setup virtual environment
+virtualenv venv
+
+# activate envirnoment
+./venv/Script/activate  #  Window
+. ./venv/bin/activate  # Linux
+
+# Install
+pip install -r requirements.txt
+
+# Running
+python ./app.py
+
+```
+Then, go to http://localhost:5000/ to access the UI.
+
+<br />
 
 ## Format
 
@@ -62,27 +82,28 @@ Contraints:-
 n_markers: [ int ] (number of markers to be used)
 stick_lengths: [ float ] (length of stick available for configuration)
 
-Simiarity Function: 
+Simiarity Function:
 name: string
 param names: param values
 
-Example
 {
     "sockets": [
-        {"x": 1.0, "y": 1.0, "z": 1.0,  "vx": 1.0, "vy": 0.0, "vz": 0.0},
-        {"x": 1.0, "y": 1.0, "z": 1.0,  "vx": 0.0, "vy": 1.0, "vz": 0.0},
-        {"x": 1.0, "y": 2.0, "z": 1.0,  "vx": 0.5774, "vy": 0.5774, "vz": 0.5774},
-        {"x": 1.0, "y": 1.0, "z": 2.0,  "vx": 0.0, "vy": 0.0, "vz": 1.0}
+        {"x": 0.0, "y": 0.0, "z": 0.0,  "vx": 1.0, "vy": 0.0, "vz": 0.0},
+        {"x": 0.0, "y": 0.0, "z": 0.0,  "vx": -1.0, "vy": 0.0, "vz": 0.0},
+        {"x": 0.0, "y": 0.0, "z": 0.0,  "vx": 0.0, "vy": 0.0, "vz": 1.0},
+        {"x": 0.0, "y": 10.0, "z": 0.0,  "vx": 1.0, "vy": 0.0, "vz": 0.0},
+        {"x": 0.0, "y": 10.0, "z": 0.0,  "vx": -1.0, "vy": 0.0, "vz": 0.0},
+        {"x": 0.0, "y": 10.0, "z": 0.0,  "vx": 0.0, "vy": 0.0, "vz": 1.0}
+
     ],
     "constraints": {
-        "n_markers": [4, 5],
-        "stick_lengths": [ 30.0, 40.0 ]
+        "n_markers": [4, 5, 5],
+        "stick_lengths": [ 10.0, 30.0, 50.0 ]
     },
     "similarity_function": {
         "name": "l2_point_norm",
-        "threshold": 10
-    } 
+        "avg_threshold": 10.0,
+        "max_threshold": 20.0
+    }
 }
-
-
 ```

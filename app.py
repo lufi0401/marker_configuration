@@ -70,5 +70,5 @@ def list_tasks():
 
 
 if __name__ == '__main__':
-    logging.basicConfig(level=logging.DEBUG)
+    logging.basicConfig(level=logging.INFO)
     app.run(host="0.0.0.0", port="5000", debug=True)

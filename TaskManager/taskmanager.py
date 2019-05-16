@@ -30,6 +30,7 @@ class TaskManager(object):
                         os.path.join(path, DB_NAME)
         self.running_tasks = {}
 
+        os.makedirs(os.path.split(self.db_path)[0], exist_ok=True)
         conn = sqlite3.connect(self.db_path)
         c = conn.cursor()
         c.execute('''CREATE TABLE IF NOT EXISTS input_sets(
@@ -70,7 +71,7 @@ class TaskManager(object):
             }
 
     def start_task(self, input_id):
-        # input_id and task_id is same for now, but maybe changed to 
+        # input_id and task_id is same for now, but maybe changed to
         # have multiple running tasks
         task_id = input_id
         if self.running_tasks.get(task_id) is not None:
@@ -95,7 +96,7 @@ class TaskManager(object):
             }
         }
         params_dict.update(task_data)
-        p = Process(target=self.__execute, kwargs=params_dict) 
+        p = Process(target=self.__execute, kwargs=params_dict)
         p.start()
         t = Task(p, interrupt_flag)
         self.running_tasks[task_id] = t
@@ -104,7 +105,7 @@ class TaskManager(object):
             "task_id": task_id
         }
 
-    def stop_task(self, task_id): 
+    def stop_task(self, task_id):
         if self.running_tasks.get(task_id) is not None:
             t = self.running_tasks.get(task_id)
             if t.process.is_alive():
@@ -150,7 +151,7 @@ class TaskManager(object):
             return {
                 "status": True,
                 "tasks": tasks
-            }                
+            }
         except Exception as e:
             logging.debug("Error list_tasks: {}".format(e))
             conn.close()
@@ -223,7 +224,7 @@ class TaskManager(object):
             if row is None:
                 raise IndexError("input_id {} not found".format(input_id))
             input_set = json.loads(row[0])
-        
+
             query = """REPLACE INTO results
                        (input_id, result_id, progress, result_json)
                        VALUES (?, ?, "Initializing...", NULL)"""
@@ -244,13 +245,13 @@ class TaskManager(object):
 
     @staticmethod
     def update_task(update_type, content, db_path, task_id):
-        """ 
+        """
         To be passed to task so that either progress or result_json can be
-        updated with content for monitoring 
+        updated with content for monitoring
         """
         if update_type not in ["progress", "result_json"]:
             return False
-        
+
         logging.debug("update_task, task_id: {}; type: {}; data: {}".format(
             task_id, update_type, content))
         try:

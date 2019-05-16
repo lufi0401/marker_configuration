@@ -124,8 +124,6 @@ function show_task_details(input_id) {
             $(tr).append("<td>" + sockets[i].vz + "</td>");
             tbody.append(tr);
         }
-        // setup sockets
-        setTimeout(three_setup_sockets, 0);
 
         // update contraints and similarity_function
         $("pre#cons_sims").text(
@@ -200,7 +198,7 @@ function three_init() {
 
     set_scene.container = $('#three_container');
     
-    set_scene.renderer = new THREE.WebGLRenderer({ antialias: true });
+    set_scene.renderer = new THREE.WebGLRenderer();
     $(set_scene.container).empty();
     $(set_scene.container).append(set_scene.renderer.domElement);
     set_scene.w = 1000.;
@@ -244,35 +242,6 @@ function animate() {
     set_scene.renderer.render(set_scene.scene, set_scene.camera);
 };
 
-function three_setup_sockets() {
-    if (set_scene.sockets != null)
-        set_scene.scene.remove(set_scene.sockets);
-
-    let sockets = current_task.input_json.sockets;
-
-    let material = new THREE.MeshPhongMaterial({ color: 0xf94545 });
-    let geometry = new THREE.CylinderGeometry(.5,0,.5);
-    
-    let new_sockets = new THREE.Group();
-    set_scene.sockets = new_sockets
-    set_scene.scene.add(new_sockets);
-
-    let from_vec = new THREE.Vector3(0, 1, 0);
-    for (let i in sockets) {
-        let soc = sockets[i]
-        
-        let to_vec = new THREE.Vector3(soc["vx"], soc["vy"], soc["vz"])
-        
-        let quat = new THREE.Quaternion();
-        quat.setFromUnitVectors(from_vec, to_vec);
-
-        let disk = new THREE.Mesh(geometry, material);
-        new_sockets.add(disk);
-        disk.position.set(soc["x"], soc["y"], soc["z"])
-        // disk.setRotationFromQuaternion(quat);
-        disk.applyQuaternion(quat);
-    }
-}
 
 function three_update_unique_set() {
     let tbody = $("tbody#unique_set");
@@ -289,7 +258,7 @@ function three_update_unique_set() {
     let geometry = new THREE.SphereGeometry(1);
     let material = new THREE.MeshPhongMaterial({ color: 0xefefef });
 
-    let new_unique_set = new THREE.Group();
+    let new_unique_set = new THREE.Object3D();
     for (let i in positions) {
         let pos = positions[i];
         let ball = new THREE.Mesh(geometry, material);
