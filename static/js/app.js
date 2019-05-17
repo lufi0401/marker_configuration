@@ -36,13 +36,21 @@ function refresh_tasks() {
     })
 }
 
-$("a#refresh.button").click(refresh_tasks);
+$("a#list_refresh.button").click(refresh_tasks);
 
 $("input:file#upload").change(() =>{
+    let loader = $("div#refresh.loader").show();
     let file = $("input:file#upload").prop("files")[0];
+    let btn = $("input:file#upload")
+    $(btn).wrap('<form>').closest('form').get(0).reset();
+
     let fileReader = new FileReader();
-    fileReader.onerror = () => { alert("Failed to read selected file.") };
+    fileReader.onerror = () => { 
+        alert("Failed to read selected file.");
+        $(loader).hide();
+    };
     fileReader.onload = () => {
+        $(loader).hide();
         let result = fileReader.result;
         console.log(result)
         if (!result.startsWith("data:application/json")) {
@@ -101,8 +109,11 @@ function update_progress(data) {
         $(start_button).removeClass("disabled").show();
     }
 
-    $("div#progress_update p").text(current_task.progress);
+    let u = current_task.progress == null ? '.' : current_task.progress;
+    $("div#progress_update p").text(u);
 }
+
+$('a#details_refresh').click(() => show_task_details(current_task.input_id))
 
 function show_task_details(input_id) {
     $.getJSON("/input_set/" + input_id, function (data) {
@@ -116,6 +127,7 @@ function show_task_details(input_id) {
         tbody.empty();
         for (let i in sockets) {
             let tr = $('<tr/>');
+            $(tr).append("<td>" + i + "</td>");
             $(tr).append("<td>" + sockets[i].x.toFixed(4) + "</td>");
             $(tr).append("<td>" + sockets[i].y.toFixed(4) + "</td>");
             $(tr).append("<td>" + sockets[i].z.toFixed(4) + "</td>");
@@ -132,6 +144,9 @@ function show_task_details(input_id) {
             JSON.stringify(current_task.input_json.constraints, null, 2) + "\n\n" +
             JSON.stringify(current_task.input_json.similarity_function, null, 2)
         );
+
+        // update full json
+        $("pre#full_json").text(JSON.stringify(current_task, null, 2));
 
         // setup unique_set
         let n_unique_set = 0;
@@ -298,6 +313,9 @@ function three_update_unique_set() {
     let positions = current_task.result_json[unique_set_id].markers;
     let socket_ids = current_task.result_json[unique_set_id].socket_ids;
     let sockets = current_task.input_json.sockets;
+    let stick_ids = current_task.result_json[unique_set_id].stick_ids;
+    let stick_lengths = current_task.input_json.constraints.stick_lengths;
+
 
     let geometry = new THREE.SphereGeometry(1);
     let material = new THREE.MeshPhongMaterial({ color: 0xefefef });
@@ -316,7 +334,8 @@ function three_update_unique_set() {
         ball.position.set(pos["x"], pos["y"], pos["z"]);
         new_unique_set.add(ball);
 
-        let skt_pos = sockets[socket_ids[i]];
+        let socket_id = socket_ids[i]
+        let skt_pos = sockets[socket_id];
         let line_geometry = new THREE.Geometry();
         line_geometry.vertices.push(
             new THREE.Vector3(pos["x"], pos["y"], pos["z"]),
@@ -326,6 +345,9 @@ function three_update_unique_set() {
         new_unique_set.add(line);
 
         let tr = $('<tr/>');
+        $(tr).append("<td>" + i + "</td>");
+        $(tr).append("<td>" + socket_id + "</td>");
+        $(tr).append("<td>" + stick_lengths[stick_ids[i]] + "</td>");
         $(tr).append("<td>" + positions[i].x.toFixed(4) + "</td>");
         $(tr).append("<td>" + positions[i].y.toFixed(4) + "</td>");
         $(tr).append("<td>" + positions[i].z.toFixed(4) + "</td>");

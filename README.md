@@ -117,10 +117,38 @@ param names: param values
 
 .
 
+## Issues & Tracking
+
+###issues
+
+[x] Upload File button won't respond if same file is selected again.
+[x] progress update bar collapse if no progress
+
+### Suggestions
+
+[ ] Try Iterative Closest Point Algorithm for similarity function
+[x] Somewhere to display Full json
+[x] Add numbering on tables
+[x] Add socket ID on marker point and length on visualization table
+[ ] Allow type and upload
+[ ] Or make a UI design interface?
+[ ] Reload 3D visualization when task finishs
+[ ] Allow delete task
+
+### Thouhghts
+
+[ ] JSON validation 
+[ ] Use detached subprocess to generate instead of same process? 
+    May need to rearrange message passing
+[ ] Wireframe not connecting all sockets
+[ ] Allow somewhere to include the base mesh?
+.
+
 ## Library Used
 
 ### Python
 
+- [sqlite3](https://docs.python.org/3/library/sqlite3.html)
 - [flask](flask.pocoo.org/)
 - [numpy](https://www.numpy.org/)
 

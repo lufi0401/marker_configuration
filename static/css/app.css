@@ -3,6 +3,11 @@ div#tasks {
     overflow-y: scroll;
 }
 
+pre#full_json {
+    height: 300px;
+    overflow-y: scroll;
+}
+
 .callout.rounded {
   border-radius: 20px;
 }

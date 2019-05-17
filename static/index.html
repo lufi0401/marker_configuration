@@ -16,7 +16,7 @@
     <div class="callout">
         <div class="clearfix">
             <h4 class="float-left">All Tasks</h4>
-            <a id="refresh" class="button float-right">Refresh</a>
+            <a id="list_refresh" class="button float-right">Refresh</a>
             <label for="upload" class="button hollow float-right">Upload Input Set</label>
             <input type="file" id="upload" class="show-for-sr">
             <div id="refresh" class="loader float-right"></div>
@@ -48,6 +48,7 @@
             <h4 class="float-left">Task Details: <b id="task_id"></b></h4>
             <a id="stop" class="button float-right alert disabled" href="#">Stop</a>
             <a id="start" class="button float-right disabled" href="#">Start</a>
+            <a id="details_reload" class="button warning float-right">Reload</a>
         </div>
         <div id="progress_update" class="callout secondary rounded bordered">
             
@@ -57,6 +58,7 @@
         <ul class="tabs" data-tabs id="example-tabs">
             <li class="tabs-title is-active"><a href="#input_set" aria-selected="true">Input Set</a></li>
             <li class="tabs-title"><a href="#unique_set">Unique Sets</a></li>
+            <li class="tabs-title"><a href="#full_json">Full JSON</a></li>
         </ul>
         
         <div class="tabs-content" data-tabs-content="example-tabs">
@@ -67,6 +69,7 @@
                         <table>
                             <thead>
                                 <tr>
+                                    <th></th>
                                     <th>x</th>
                                     <th>y</th>
                                     <th>z</th>
@@ -101,6 +104,9 @@
                         <table>
                             <thead>
                                 <tr>
+                                    <th> </th>
+                                    <th>socket#</th>
+                                    <th>length</th>
                                     <th>x</th>
                                     <th>y</th>
                                     <th>z</th>
@@ -109,6 +115,11 @@
                             <tbody id="unique_set"></tbody>
                         </table>
                     </div>
+                </div>
+            </div>
+            <div class="tabs-panel" id="full_json">
+                <div>
+                    <pre id="full_json"></pre>
                 </div>
             </div>
         </div>
